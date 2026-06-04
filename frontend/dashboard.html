@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>HobbyLog — Dashboard</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; background: #f5f5f3; min-height: 100vh; }
+    nav { background: white; border-bottom: 1px solid #eee; padding: 0 2rem;
+          display: flex; align-items: center; justify-content: space-between; height: 52px; }
+    .brand { font-weight: 600; font-size: 15px; display: flex; align-items: center; gap: 8px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: #1D9E75; }
+    .avatar { width: 30px; height: 30px; border-radius: 50%; background: #E1F5EE;
+              display: flex; align-items: center; justify-content: center;
+              font-size: 12px; font-weight: 600; color: #085041; }
+    .logout { font-size: 12px; color: #888; background: none; border: 1px solid #eee;
+              padding: 4px 12px; border-radius: 6px; cursor: pointer; }
+    main { max-width: 720px; margin: 2rem auto; padding: 0 1rem; }
+    .welcome h1 { font-size: 20px; font-weight: 600; }
+    .welcome p { font-size: 13px; color: #888; margin-top: 3px; }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 1.5rem 0; }
+    .stat { background: #f0f0ee; border-radius: 8px; padding: 12px 14px; }
+    .stat-label { font-size: 12px; color: #888; margin-bottom: 4px; }
+    .stat-val { font-size: 22px; font-weight: 600; }
+    .editor { background: white; border: 1px solid #eee; border-radius: 12px;
+              padding: 1.25rem; margin-bottom: 1.5rem; }
+    .editor h2 { font-size: 14px; font-weight: 600; margin-bottom: 12px; }
+    .editor input, .editor textarea, .editor select {
+      width: 100%; padding: 9px 12px; border: 1px solid #e0e0e0; border-radius: 8px;
+      font-size: 14px; margin-bottom: 10px; outline: none; font-family: inherit; }
+    .editor textarea { height: 90px; resize: none; }
+    .editor input:focus, .editor textarea:focus, .editor select:focus { border-color: #1D9E75; }
+    .pub-btn { background: #1D9E75; color: white; border: none; padding: 9px 20px;
+               border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; float: right; }
+    .posts-hdr { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .posts-hdr h2 { font-size: 15px; font-weight: 600; }
+    .post-card { background: white; border: 1px solid #eee; border-radius: 12px;
+                 padding: 1rem 1.25rem; margin-bottom: 10px; }
+    .post-top { display: flex; justify-content: space-between; gap: 8px; }
+    .post-title { font-size: 14px; font-weight: 600; }
+    .post-body { font-size: 13px; color: #666; margin-top: 5px; line-height: 1.6; }
+    .post-footer { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+    .post-tag { font-size: 11px; padding: 2px 10px; border-radius: 20px;
+                background: #E1F5EE; color: #085041; font-weight: 500; }
+    .post-date { font-size: 11px; color: #aaa; margin-left: auto; }
+    .del-btn { background: none; border: none; cursor: pointer; color: #ccc; font-size: 18px; }
+    .del-btn:hover { color: #e74c3c; }
+    #feedback { font-size: 13px; color: #1D9E75; margin-top: 8px; min-height: 18px; }
+    .empty { text-align: center; color: #aaa; font-size: 14px; padding: 2rem; }
+  </style>
+</head>
+<body>
+<nav>
+  <div class="brand"><div class="dot"></div> HobbyLog</div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <span id="userName" style="font-size:13px;color:#666"></span>
+    <div class="avatar" id="userAvatar">?</div>
+    <button class="logout" onclick="logout()">Sign out</button>
+  </div>
+</nav>
+
+<main>
+  <div class="welcome">
+    <h1 id="greeting">Good day!</h1>
+    <p>Share what you've been up to lately.</p>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-label">Total posts</div><div class="stat-val" id="totalPosts">0</div></div>
+    <div class="stat"><div class="stat-label">This month</div><div class="stat-val" id="monthPosts">0</div></div>
+    <div class="stat"><div class="stat-label">Categories</div><div class="stat-val" id="totalCats">0</div></div>
+  </div>
+
+  <div class="editor">
+    <h2>New post</h2>
+    <input type="text" id="postTitle" placeholder="Post title..." />
+    <textarea id="postContent" placeholder="What have you been up to?"></textarea>
+    <select id="postCategory">
+      <option value="">Select a category...</option>
+      <option>Photography</option>
+      <option>Cooking</option>
+      <option>Travel</option>
+      <option>Reading</option>
+      <option>Gardening</option>
+      <option>Music</option>
+      <option>Sports</option>
+      <option>Art</option>
+    </select>
+    <button class="pub-btn" onclick="createPost()">Publish →</button>
+    <div style="clear:both"></div>
+    <div id="feedback"></div>
+  </div>
+
+  <div class="posts-hdr">
+    <h2>Your posts</h2>
+    <span id="postCount" style="font-size:12px;color:#888"></span>
+  </div>
+  <div id="postsList"></div>
+</main>
+
+<script>
+  const API = 'http://localhost:3000/api';
+  const token = localStorage.getItem('token');
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+  // Redirect if not logged in
+  if (!token) window.location.href = '/index.html';
+
+  // Set user info
+  document.getElementById('userName').textContent = user.name || '';
+  document.getElementById('userAvatar').textContent =
+    (user.name || 'U').split(' ').map(n => n[0]).join('').toUpperCase();
+
+  // Greeting
+  const hr = new Date().getHours();
+  const greet = hr < 12 ? 'Good morning' : hr < 17 ? 'Good afternoon' : 'Good evening';
+  document.getElementById('greeting').textContent = `${greet}, ${user.name?.split(' ')[0] || 'there'}`;
+
+  function headers() {
+    return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
+  }
+
+  async function loadPosts() {
+    const res = await fetch(`${API}/posts`, { headers: headers() });
+    if (res.status === 401) { logout(); return; }
+    const data = await res.json();
+    const posts = data.posts || [];
+
+    // Update stats
+    const now = new Date();
+    const thisMonth = posts.filter(p => {
+      const d = new Date(p.createdAt); return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    }).length;
+    const cats = new Set(posts.map(p => p.category)).size;
+
+    document.getElementById('totalPosts').textContent = posts.length;
+    document.getElementById('monthPosts').textContent = thisMonth;
+    document.getElementById('totalCats').textContent = cats;
+    document.getElementById('postCount').textContent = `${posts.length} ${posts.length === 1 ? 'entry' : 'entries'}`;
+
+    // Render posts
+    const list = document.getElementById('postsList');
+    if (posts.length === 0) {
+      list.innerHTML = '<div class="empty">No posts yet — write your first one above!</div>';
+      return;
+    }
+    list.innerHTML = posts.map(p => `
+      <div class="post-card" id="post-${p.id}">
+        <div class="post-top">
+          <div>
+            <div class="post-title">${escHtml(p.title)}</div>
+            <div class="post-body">${escHtml(p.content)}</div>
+          </div>
+          <button class="del-btn" onclick="deletePost('${p.id}')" aria-label="Delete post">&#10005;</button>
+        </div>
+        <div class="post-footer">
+          <span class="post-tag">${escHtml(p.category)}</span>
+          <span class="post-date">${formatDate(p.createdAt)}</span>
+        </div>
+      </div>`).join('');
+  }
+
+  async function createPost() {
+    const title = document.getElementById('postTitle').value.trim();
+    const content = document.getElementById('postContent').value.trim();
+    const category = document.getElementById('postCategory').value;
+    const fb = document.getElementById('feedback');
+
+    if (!title || !content || !category) {
+      fb.style.color = '#e74c3c'; fb.textContent = 'Please fill in all fields.'; return;
+    }
+
+    const res = await fetch(`${API}/posts`, {
+      method: 'POST', headers: headers(),
+      body: JSON.stringify({ title, content, category })
+    });
+
+    if (res.ok) {
+      document.getElementById('postTitle').value = '';
+      document.getElementById('postContent').value = '';
+      document.getElementById('postCategory').value = '';
+      fb.style.color = '#1D9E75'; fb.textContent = 'Post published!';
+      setTimeout(() => fb.textContent = '', 2000);
+      loadPosts();
+    } else {
+      fb.style.color = '#e74c3c'; fb.textContent = 'Failed to publish. Try again.';
+    }
+  }
+
+  async function deletePost(id) {
+    if (!confirm('Delete this post?')) return;
+    const res = await fetch(`${API}/posts/${id}`, { method: 'DELETE', headers: headers() });
+    if (res.ok) loadPosts();
+  }
+
+  function logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = '/index.html';
+  }
+
+  function formatDate(dt) {
+    return new Date(dt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  loadPosts();
+</script>
+</body>
+</html>

@@ -2,94 +2,648 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>HobbyLog — Sign In</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: sans-serif; background: #f5f5f3;
-           display: flex; align-items: center; justify-content: center; min-height: 100vh; }
-    .card { background: white; border-radius: 12px; width: 400px; overflow: hidden;
-            border: 1px solid #eee; }
-    .tabs { display: flex; border-bottom: 1px solid #eee; }
-    .tab { flex: 1; padding: 14px; border: none; background: none; cursor: pointer;
-           font-size: 14px; font-weight: 500; color: #888; border-bottom: 2px solid transparent; }
-    .tab.active { color: #1D9E75; border-bottom-color: #1D9E75; }
-    .body { padding: 24px; }
-    label { display: block; font-size: 12px; font-weight: 600; color: #666;
-            text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 5px; }
-    input { width: 100%; padding: 10px 12px; border: 1px solid #e0e0e0; border-radius: 8px;
-            font-size: 14px; margin-bottom: 14px; outline: none; }
-    input:focus { border-color: #1D9E75; }
-    .btn { width: 100%; padding: 11px; background: #1D9E75; color: white; border: none;
-           border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
-    #msg { margin-top: 12px; font-size: 13px; text-align: center; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #f5f5f3;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    /* ── Outer card ── */
+    .auth-card {
+      display: flex;
+      width: 100%;
+      max-width: 860px;
+      min-height: 520px;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid #e4e4e0;
+      background: white;
+    }
+
+    /* ── Left brand panel ── */
+    .brand-panel {
+      display: none;
+      flex: 1;
+      background: #0F6E56;
+      padding: 2.5rem;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .brand-panel::before {
+      content: '';
+      position: absolute;
+      width: 320px;
+      height: 320px;
+      border-radius: 50%;
+      border: 60px solid rgba(255,255,255,0.06);
+      top: -80px;
+      right: -80px;
+    }
+
+    .brand-panel::after {
+      content: '';
+      position: absolute;
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      border: 40px solid rgba(255,255,255,0.05);
+      bottom: 40px;
+      left: -60px;
+    }
+
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: #1D9E75;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .brand-icon svg { width: 20px; height: 20px; fill: white; }
+
+    .brand-name {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 18px;
+      color: white;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-body { z-index: 1; }
+
+    .brand-body h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 26px;
+      font-weight: 700;
+      color: white;
+      line-height: 1.3;
+      margin-bottom: 12px;
+    }
+
+    .brand-body p {
+      font-size: 14px;
+      color: rgba(255,255,255,0.7);
+      line-height: 1.7;
+    }
+
+    .brand-features { z-index: 1; }
+
+    .brand-feature {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .brand-feature-dot {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 14px;
+      color: white;
+    }
+
+    .brand-feature span {
+      font-size: 13px;
+      color: rgba(255,255,255,0.8);
+    }
+
+    /* ── Right form panel ── */
+    .form-panel {
+      width: 100%;
+      padding: 2rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    /* Mobile logo (hidden on desktop) */
+    .mobile-logo {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 1.75rem;
+    }
+
+    .mobile-logo-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: #0F6E56;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 10px;
+    }
+
+    .mobile-logo-icon svg { width: 26px; height: 26px; fill: white; }
+
+    .mobile-logo h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: #111;
+      letter-spacing: -0.02em;
+    }
+
+    .mobile-logo p {
+      font-size: 13px;
+      color: #888;
+      margin-top: 2px;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid #eee;
+      margin-bottom: 1.5rem;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 10px 0;
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      color: #aaa;
+      border-bottom: 2px solid transparent;
+      font-family: 'DM Sans', sans-serif;
+      transition: all 0.2s;
+    }
+
+    .tab.active { color: #0F6E56; border-bottom-color: #1D9E75; }
+
+    /* Form elements */
+    .field { margin-bottom: 1rem; }
+
+    .field label {
+      display: block;
+      font-size: 11px;
+      font-weight: 500;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 6px;
+    }
+
+    .input-wrap { position: relative; }
+
+    .input-wrap input {
+      width: 100%;
+      height: 44px;
+      padding: 0 40px 0 12px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: 'DM Sans', sans-serif;
+      color: #111;
+      background: #fafafa;
+      outline: none;
+      transition: border-color 0.15s, background 0.15s;
+    }
+
+    .input-wrap input:focus {
+      border-color: #1D9E75;
+      background: white;
+    }
+
+    .input-icon {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #ccc;
+      font-size: 16px;
+      cursor: pointer;
+      user-select: none;
+      transition: color 0.15s;
+    }
+
+    .input-icon:hover { color: #888; }
+
+    /* Name row (signup) */
+    .name-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    /* Forgot password */
+    .forgot {
+      text-align: right;
+      margin-top: -6px;
+      margin-bottom: 14px;
+    }
+
+    .forgot a {
+      font-size: 12px;
+      color: #1D9E75;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    /* Strength bar */
+    .strength-bar {
+      height: 3px;
+      border-radius: 2px;
+      background: #eee;
+      margin-top: 6px;
+      overflow: hidden;
+    }
+
+    .strength-fill {
+      height: 100%;
+      width: 0;
+      background: #1D9E75;
+      transition: width 0.3s, background 0.3s;
+      border-radius: 2px;
+    }
+
+    /* Submit button */
+    .submit-btn {
+      width: 100%;
+      height: 44px;
+      background: #0F6E56;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      font-family: 'Syne', sans-serif;
+      cursor: pointer;
+      letter-spacing: 0.01em;
+      transition: background 0.2s, transform 0.1s;
+      margin-bottom: 1rem;
+    }
+
+    .submit-btn:hover { background: #1D9E75; }
+    .submit-btn:active { transform: scale(0.99); }
+
+    /* Divider */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+      color: #bbb;
+      margin-bottom: 1rem;
+    }
+
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #eee;
+    }
+
+    /* Google button */
+    .google-btn {
+      width: 100%;
+      height: 42px;
+      background: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      font-family: 'DM Sans', sans-serif;
+      color: #444;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .google-btn:hover { background: #f9f9f9; border-color: #ccc; }
+
+    .google-btn svg { width: 18px; height: 18px; }
+
+    /* Helper text */
+    .helper {
+      text-align: center;
+      font-size: 12px;
+      color: #aaa;
+      margin-top: 1rem;
+    }
+
+    .helper a { color: #1D9E75; font-weight: 500; text-decoration: none; cursor: pointer; }
+
+    /* Feedback message */
+    #feedback {
+      font-size: 13px;
+      text-align: center;
+      margin-top: 10px;
+      min-height: 18px;
+      border-radius: 6px;
+      padding: 0;
+      transition: all 0.2s;
+    }
+
+    #feedback.error {
+      background: #fff0f0;
+      color: #c0392b;
+      padding: 8px 12px;
+    }
+
+    #feedback.success {
+      background: #f0faf5;
+      color: #0F6E56;
+      padding: 8px 12px;
+    }
+
+    /* ── Responsive breakpoints ── */
+    @media (min-width: 768px) {
+      .brand-panel { display: flex; }
+      .form-panel { width: 400px; flex-shrink: 0; padding: 2.5rem; }
+      .mobile-logo { display: none; }
+    }
+
+    @media (max-width: 480px) {
+      body { padding: 0; align-items: flex-end; }
+      .auth-card {
+        border-radius: 20px 20px 0 0;
+        min-height: auto;
+        border-bottom: none;
+      }
+      .form-panel { padding: 1.75rem 1.25rem 2rem; }
+      .name-row { grid-template-columns: 1fr; gap: 0; }
+    }
   </style>
 </head>
 <body>
-<div class="card">
-  <div class="tabs">
-    <button class="tab active" onclick="show('login')">Sign In</button>
-    <button class="tab" onclick="show('signup')">Sign Up</button>
+
+<div class="auth-card">
+
+  <!-- Left brand panel (desktop only) -->
+  <div class="brand-panel">
+    <div class="brand-logo">
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 3C7 3 3 7 3 12s4 9 9 9 9-4 9-9-4-9-9-9zm-1 13H9V8h2v8zm4 0h-2V8h2v8z"/></svg>
+      </div>
+      <span class="brand-name">HobbyLog</span>
+    </div>
+
+    <div class="brand-body">
+      <h2>Your hobbies,<br/>your story.</h2>
+      <p>A personal space to write about the things you love — one post at a time.</p>
+    </div>
+
+    <div class="brand-features">
+      <div class="brand-feature">
+        <span>A dedicated space built entirely for your passion projects</span>
+      </div>
+      <div class="brand-feature">
+        <span> Document your journey, milestones, and daily progress seamlessly.</span>
+      </div>
+      <div class="brand-feature">
+        <span>Build a beautiful, lasting archive of the things you love.</span>
+      </div>
+    </div>
   </div>
-  <div class="body">
-    <div id="loginForm">
-      <label>Email</label>
-      <input type="email" id="loginEmail" placeholder="you@example.com" />
-      <label>Password</label>
-      <input type="password" id="loginPass" placeholder="••••••••" />
-      <button class="btn" onclick="login()">Sign In →</button>
+
+  <!-- Right form panel -->
+  <div class="form-panel">
+
+    <!-- Mobile-only logo -->
+    <div class="mobile-logo">
+      <div class="mobile-logo-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 3C7 3 3 7 3 12s4 9 9 9 9-4 9-9-4-9-9-9zm-1 13H9V8h2v8zm4 0h-2V8h2v8z"/></svg>
+      </div>
+      <h1>HobbyLog</h1>
+      <p>Your personal hobby journal</p>
     </div>
-    <div id="signupForm" style="display:none">
-      <label>Full Name</label>
-      <input type="text" id="signupName" placeholder="Ada Lovelace" />
-      <label>Email</label>
-      <input type="email" id="signupEmail" placeholder="you@example.com" />
-      <label>Password</label>
-      <input type="password" id="signupPass" placeholder="Min. 8 characters" />
-      <button class="btn" onclick="signup()">Create Account →</button>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" id="tab-login" onclick="switchTab('login')">Sign in</button>
+      <button class="tab" id="tab-signup" onclick="switchTab('signup')">Create account</button>
     </div>
-    <p id="msg"></p>
+
+    <!-- Login form -->
+    <div id="form-login">
+      <div class="field">
+        <label>Email address</label>
+        <div class="input-wrap">
+          <input type="email" id="loginEmail" placeholder="you@example.com" />
+          <span class="input-icon">✉</span>
+        </div>
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <div class="input-wrap">
+          <input type="password" id="loginPass" placeholder="••••••••" />
+          <span class="input-icon" onclick="togglePass('loginPass', this)">👁</span>
+        </div>
+      </div>
+      <div class="forgot"><a href="#">Forgot password?</a></div>
+      <button class="submit-btn" onclick="login()">Sign in →</button>
+      <div class="divider">or continue with</div>
+      <button class="google-btn">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+        </svg>
+        Continue with Google
+      </button>
+    </div>
+
+    <!-- Signup form -->
+    <div id="form-signup" style="display:none">
+      <div class="name-row">
+        <div class="field">
+          <label>First name</label>
+          <div class="input-wrap">
+            <input type="text" id="signupFirst" placeholder="Ada" />
+            <span class="input-icon">👤</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>Last name</label>
+          <div class="input-wrap">
+            <input type="text" id="signupLast" placeholder="Lovelace" />
+          </div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Email address</label>
+        <div class="input-wrap">
+          <input type="email" id="signupEmail" placeholder="you@example.com" />
+          <span class="input-icon">✉</span>
+        </div>
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <div class="input-wrap">
+          <input type="password" id="signupPass" placeholder="Min. 8 characters" oninput="checkStrength(this.value)" />
+          <span class="input-icon" onclick="togglePass('signupPass', this)">👁</span>
+        </div>
+        <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+      </div>
+      <div class="field">
+        <label>Confirm password</label>
+        <div class="input-wrap">
+          <input type="password" id="signupPass2" placeholder="Re-enter password" />
+          <span class="input-icon" onclick="togglePass('signupPass2', this)">👁</span>
+        </div>
+      </div>
+      <button class="submit-btn" onclick="signup()">Create account →</button>
+      <div class="divider">or continue with</div>
+      <button class="google-btn">
+        <svg viewBox="0 0 24 24">
+          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+        </svg>
+        Continue with Google
+      </button>
+    </div>
+
+    <div id="feedback"></div>
+
+    <p class="helper">
+      <span id="helperText">Don't have an account? <a onclick="switchTab('signup')">Sign up free</a></span>
+    </p>
+
   </div>
 </div>
+
 <script>
   const API = 'http://localhost:3000/api';
-  const msg = document.getElementById('msg');
 
-  function show(tab) {
-    document.getElementById('loginForm').style.display = tab === 'login' ? '' : 'none';
-    document.getElementById('signupForm').style.display = tab === 'signup' ? '' : 'none';
-    document.querySelectorAll('.tab').forEach((t, i) =>
-      t.classList.toggle('active', (i === 0) === (tab === 'login')));
+  // Redirect if already logged in
+  if (localStorage.getItem('token')) window.location.href = '/dashboard.html';
+
+  function switchTab(tab) {
+    const isLogin = tab === 'login';
+    document.getElementById('form-login').style.display = isLogin ? '' : 'none';
+    document.getElementById('form-signup').style.display = isLogin ? 'none' : '';
+    document.getElementById('tab-login').className = 'tab' + (isLogin ? ' active' : '');
+    document.getElementById('tab-signup').className = 'tab' + (!isLogin ? ' active' : '');
+    document.getElementById('helperText').innerHTML = isLogin
+      ? 'Don\'t have an account? <a onclick="switchTab(\'signup\')">Sign up free</a>'
+      : 'Already have an account? <a onclick="switchTab(\'login\')">Sign in</a>';
+    setFeedback('', '');
+  }
+
+  function togglePass(inputId, icon) {
+    const input = document.getElementById(inputId);
+    const isText = input.type === 'text';
+    input.type = isText ? 'password' : 'text';
+    icon.style.opacity = isText ? '0.4' : '1';
+  }
+
+  function checkStrength(val) {
+    let score = 0;
+    if (val.length >= 8) score++;
+    if (/[A-Z]/.test(val)) score++;
+    if (/[0-9]/.test(val)) score++;
+    if (/[^A-Za-z0-9]/.test(val)) score++;
+    const fill = document.getElementById('strengthFill');
+    fill.style.width = (score * 25) + '%';
+    fill.style.background = ['#e74c3c','#e67e22','#1D9E75','#0F6E56'][score - 1] || '#eee';
+  }
+
+  function setFeedback(msg, type) {
+    const el = document.getElementById('feedback');
+    el.textContent = msg;
+    el.className = type;
   }
 
   async function login() {
-    const res = await fetch(`${API}/auth/login`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: loginEmail.value, password: loginPass.value })
-    });
-    const data = await res.json();
-    if (res.ok) {
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      window.location.href = '/dashboard.html';  // ← redirect
-    } else {
-      msg.style.color = 'red'; msg.textContent = data.error;
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPass').value;
+    if (!email || !password) { setFeedback('Please fill in all fields.', 'error'); return; }
+
+    try {
+      const res = await fetch(`${API}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        setFeedback('Welcome back! Redirecting...', 'success');
+        setTimeout(() => window.location.href = '/dashboard.html', 800);
+      } else {
+        setFeedback(data.error || 'Login failed.', 'error');
+      }
+    } catch {
+      setFeedback('Cannot reach server. Is it running?', 'error');
     }
   }
 
   async function signup() {
-    const res = await fetch(`${API}/auth/signup`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: signupName.value, email: signupEmail.value, password: signupPass.value })
-    });
-    const data = await res.json();
-    if (res.ok) {
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      window.location.href = '/dashboard.html';  // ← redirect
-    } else {
-      msg.style.color = 'red'; msg.textContent = data.error;
+    const first = document.getElementById('signupFirst').value.trim();
+    const last = document.getElementById('signupLast').value.trim();
+    const email = document.getElementById('signupEmail').value.trim();
+    const password = document.getElementById('signupPass').value;
+    const password2 = document.getElementById('signupPass2').value;
+
+    if (!first || !email || !password) { setFeedback('Please fill in all required fields.', 'error'); return; }
+    if (password !== password2) { setFeedback('Passwords do not match.', 'error'); return; }
+    if (password.length < 8) { setFeedback('Password must be at least 8 characters.', 'error'); return; }
+
+    try {
+      const res = await fetch(`${API}/auth/signup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: `${first} ${last}`.trim(), email, password })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        setFeedback('Account created! Redirecting...', 'success');
+        setTimeout(() => window.location.href = '/dashboard.html', 800);
+      } else {
+        setFeedback(data.error || 'Signup failed.', 'error');
+      }
+    } catch {
+      setFeedback('Cannot reach server. Is it running?', 'error');
     }
   }
+
+  // Allow Enter key to submit
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      const isLogin = document.getElementById('form-login').style.display !== 'none';
+      isLogin ? login() : signup();
+    }
+  });
 </script>
 </body>
 </html>
